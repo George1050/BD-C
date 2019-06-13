@@ -2,9 +2,8 @@
 #include <stdlib.h>
 #include "libpq-fe.h"
 
-
 /* IMPORTANT change this line to setup connection */
-#define DBDATA "host=localhost dbname=BD_CADQUEST user=postgres password=12031997";
+#define DBDATA "host=localhost dbname=postgres user=postgres password=postgres";
 ////////////////
 //QUERY GLOBAL//
 ////////////////
@@ -124,9 +123,8 @@ int main(int argc, char **argv){
     //////////////
 	//MEU CODIGO//
 	//////////////
-	int busca = 0;
-	char op;
-	int voltas = 0;
+	int busca = 0, op, voltas = 0;
+	char sair;
 	do{
 		printf("\n\t\t\tEscolha uma das opcoes:\n");
 		printf("============================================================================\n");
@@ -168,30 +166,31 @@ int main(int argc, char **argv){
 					listar_DomTema();
 					printf("\nInforme o Tema da Questao pelo numero indicado: \nObservacao uma questao so pode ter no maximo"
 							"5 temas e a apenas um dominio.\n"
-							"Nao encontrou o Tema certo digite 'C' para cadastrar.\n>>");
-					scanf("%c",&op);
+							"Nao encontrou o Tema certo digite '0' para cadastrar.\n>>");
+					scanf("%d",&op);
 					setbuf(stdin, NULL);
-					if(op == 'c'){
+					if(op == 0){
 						printf("Digite o Tema: ");
 						char temaN[100];
 						gets(temaN);
 						sprintf(query,"INSERT INTO tema (tema,fk_dominio) VALUES ('%s','%c');",temaN,dominio);
 						cadastrar();
-					}else{
+						setbuf(stdin, NULL);
+						system("cls");
+					}else if(op != 0){
 						tema[voltas] = op;
 						voltas++;
 						system("cls");
-					}
-					if(op != 'c'){
+						printf("%d",voltas);
 						printf("Deseja continuar a escolher temas, digite f para ficar e s para sair: ");
-						scanf("%c",&op);
+						scanf("%c",&sair);
 						setbuf(stdin, NULL);
 					}
-				}while(op != 's');	
-					printf("============================================================================\n");
-					printf("Escolha a Dificuldade: \n 1.Facil 2.Medio 3.Dificil\n>>");
-					scanf("%c",&dificuldade);
-					setbuf(stdin, NULL);
+				}while(sair != 's');	
+				printf("============================================================================\n");
+				printf("Escolha a Dificuldade: \n 1.Facil 2.Medio 3.Dificil\n>>");
+				scanf("%c",&dificuldade);
+				setbuf(stdin, NULL);
 				printf("============================================================================\n"
 						"Escreva a Pergunta: \n>>");
 				gets(pergunta);
@@ -203,13 +202,11 @@ int main(int argc, char **argv){
 				printf("============================================================================\n");
 				sprintf(query,"SELECT * FROM questoes;");
 				listar();
-				sprintf(query, "INSERT INTO questoes (fk_dominio,fk_dificuldade,pergunta,resposta) VALUES ('%c','%c','%s','%s');",dominio,dificuldade,pergunta,resposta);	
+				sprintf(query,"INSERT INTO questoes (fk_dominio,fk_dificuldade,pergunta,resposta) VALUES ('%c','%c','%s','%s');",dominio,dificuldade,pergunta,resposta);	
 			    cadastrar();
-			    for(int i = 0; i<voltas; i++){
-			    	if(tema[i] != 0){
-						sprintf(query, "INSERT INTO quest_tema VALUES (%d,'%c');",q,tema[i]);
-			    		cadastrar();
-					}
+			    for(int i = 0; i<=voltas; i++){
+					sprintf(query,"INSERT INTO quest_tema VALUES (%d,'%c');",q,tema[i]);
+			    	cadastrar();
 				}
 				system("cls");
 				printf("============================================================================\n");
@@ -229,19 +226,22 @@ int main(int argc, char **argv){
 				//BUSCA NO BD POR DOMINIO, TEMA ou PALAVRA// 
 				//TODAS AS QUESTOES QUE FOREM PARECIDAS/////
 				////////////////////////////////////////////
-				printf("Voce pode pesquisar por: \n1.Texto da questao, 2.Dominio, 3.Tema ou 4.Sair\n>>");
+				printf("Voce pode pesquisar por: \n1.Texto da questao, 2.Dominio, 3.Tema, 4.Dificuldade ou 5.Sair\n>>");
 				printf("============================================================================\n>>");
 				scanf("%d",&busca);
 				setbuf(stdin, NULL);
 				char comando[150];
 				if(busca == 0){
+					system("cls");
 					sprintf(query,"SELECT questoes.pergunta, dominio.dominio, tema.tema FROM questoes JOIN dominio ON dominio.id_dominio = questoes.fk_dominio JOIN tema ON tema.id_tema = questoes.fk_tema;");
     				listar();
 				}else if(busca == 1){
+					char p = '%';
 					printf("Digite o que voce quer Buscar: \n>>");
 					gets(comando);
+					system("cls");
 					printf("============================================================================\n");
-					sprintf(query,"SELECT pergunta, resposta FROM questoes WHERE pergunta LIKE '%s';",comando);
+					sprintf(query,"SELECT pergunta, resposta FROM questoes WHERE pergunta LIKE '%c%s%c';",p,comando,p);
 					printf("============================================================================\n");
 					listar();
 				}else if(busca == 2){
@@ -252,6 +252,7 @@ int main(int argc, char **argv){
 					printf("============================================================================\n");
 					printf("\nInforme o Dominio da Questao pelo numero indicado: \n>>");
 					gets(comando);
+					system("cls");
 					sprintf(query,"SELECT pergunta, resposta FROM questoes WHERE fk_dominio = '%s';",comando);
 					printf("============================================================================\n");
 					listar();
@@ -261,14 +262,26 @@ int main(int argc, char **argv){
 					sprintf(query,"SELECT * FROM tema;");
 					listar_DomTema();
 					printf("============================================================================\n");
-					printf("\nInforme o Dominio da Questao pelo numero indicado: \n>>");
+					printf("\nInforme o Tema da Questao pelo numero indicado: \n>>");
 					gets(comando);
-					sprintf(query,"SELECT pergunta, resposta FROM questoes WHERE fk_dominio = '%s';",comando);
+					system("cls");
+					sprintf(query,"SELECT questoes.pergunta, questoes.resposta FROM quest_tema JOIN questoes ON questoes.id_questao = quest_tema.fk_idquestao JOIN tema ON tema.id_tema = quest_tema.fk_idtema WHERE quest_tema.fk_idtema = '%s';",comando);
 					printf("============================================================================\n");
 					listar();
 				}else if(busca == 4){
-					printf("VLW");
+					setbuf(stdin, NULL);
+					sprintf(query,"SELECT * FROM dificuldade;");
+					listar_DomTema();
 					printf("============================================================================\n");
+					printf("\nInforme a Dificuldade da Questao pelo numero indicado: \n>>");
+					gets(comando);
+					system("cls");
+					sprintf(query,"SELECT * FROM questoes WHERE fk_dificuldade = '%s';",comando);
+					printf("============================================================================\n");
+					listar();
+				}else if(busca == 5){
+					system("cls");
+					printf("Vlw");
 				}
 				printf("\n");
 				break;
@@ -285,4 +298,3 @@ int main(int argc, char **argv){
 	}while(opcao != 4);
 	return 0;
 }
-
