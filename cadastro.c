@@ -4,7 +4,7 @@
 
 
 /* IMPORTANT change this line to setup connection */
-#define DBDATA "host=localhost dbname=BD_CADQUEST user=postgres password=12031997";
+#define DBDATA "host=localhost dbname=BD_CADQUEST user=postgres password=secreta";
 ////////////////
 //QUERY GLOBAL//
 ////////////////
@@ -22,7 +22,7 @@ const char *conninfo;
 void listar(){
 	int i,j;
 	///////////////////////////////////////////////////////////////
-	//SeleÁ„o das questoes mostrando a pergunta, dominio e o tema//
+	//Sele√ß√£o das questoes mostrando a pergunta, dominio e o tema//
 	///////////////////////////////////////////////////////////////
 	res = PQexec(conn,query);
 	switch (PQresultStatus(res)) {
@@ -84,7 +84,7 @@ static void exit_nicely(PGconn *conn){
     exit(1);
 }
 ////////////////////////////////////////////////
-//////////   FUN«√O PRINCIPAL   ////////////////
+//////////   FUN√á√ÉO PRINCIPAL   ////////////////
 ////////////////////////////////////////////////
 int main(int argc, char **argv){
 
